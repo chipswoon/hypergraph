@@ -8,7 +8,6 @@
 	<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0"/>	
 	<link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
 
-<!Leaflet code here>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
    integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
    crossorigin=""/>
@@ -16,11 +15,13 @@
 	<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
 	integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
 	crossorigin=""></script>
+
+	<style>
+		.legend { text-align: left; line-height: 18px; color: #555; } .legend i { width: 18px; height: 18px; float: left; margin-right: 8px; opacity: 0.7; }
+	</style>
 	
 </head>
 <body>
-
-
 
 <div id="mapid" style="width: 100%; height: 100vh;"></div>
 
@@ -30,12 +31,14 @@
 
 	var mymap = L.map('mapid').setView([-27.833, 133.583], 4);
 
-	L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+	L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw',
+	
+	{
 		maxZoom: 18,
 		attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
 			'<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
 			'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-		id: 'mapbox/streets-v11',
+		id: 'mapbox/light-v10',
 		tileSize: 512,
 		zoomOffset: -1
 	}).addTo(mymap);
@@ -43,19 +46,34 @@
 
 	L.geoJSON(geojson, {
 		style : function(feature) {
-			return {
-				color: 'red'
-			}
+			if (feature.properties.type == 'Generator') 
+				return { color: '#AC00E6' }
+			else 
+				return { color: '#F00409' }
 		},
 		pointToLayer: function(feature, latlng) {
 			return L.circle(latlng, feature.properties.value);
 		},
 		onEachFeature: function(feature, layer) {
-			layer.bindPopup(feature.properties.name + "<br><b>Reported Emissions</b>= " + feature.properties.reportedEmissions);
+			layer.bindPopup(feature.properties.name + "<br><b>Reported Emissions</b>: " + (feature.properties.reportedEmissions).toLocaleString('en'));
 			
 		}
 	}).addTo(mymap);
 
+	var legend = L.control({position: 'bottomright'});
+
+	legend.onAdd = function (mymap) {
+
+		var div = L.DomUtil.create('div', 'legend');
+			div.innerHTML += "<h4>Type</h4>";
+			div.innerHTML += '<i style="background: #F00409"></i><span>Facility</span><br>';
+			div.innerHTML += '<i style="background: #AC00E6"></i><span>Generator</span><br>';
+
+		return div;
+		
+	};
+
+	legend.addTo(mymap);
 
 </script>
 
